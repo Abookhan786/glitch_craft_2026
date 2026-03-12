@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Team {
+  id           String       @id @default(cuid())
+  name         String       @unique
+  email        String       @unique
+  password     String
+  country      String?
+  avatarSeed   String       @default("default")
+  score        Int          @default(0)
+  isAdmin      Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  submissions  Submission[]
+  hints        HintUnlock[]
+}
+
+model Category {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  slug        String      @unique
+  icon        String
+  color       String
+  challenges  Challenge[]
+}
+
+model Challenge {
+  id           String       @id @default(cuid())
+  title        String
+  description  String
+  difficulty   Difficulty
+  points       Int
+  flag         String
+  categoryId   String
+  category     Category     @relation(fields: [categoryId], references: [id])
+  hints        Hint[]
+  files        File[]
+  submissions  Submission[]
+  isActive     Boolean      @default(true)
+  isFeatured   Boolean      @default(false)
+  solveCount   Int          @default(0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Hint {
+  id          String       @id @default(cuid())
+  content     String
+  cost        Int          @default(0)
+  challengeId String
+  challenge   Challenge    @relation(fields: [challengeId], references: [id])
+  unlocks     HintUnlock[]
+}
+
+model HintUnlock {
+  id        String   @id @default(cuid())
+  teamId    String
+  hintId    String
+  team      Team     @relation(fields: [teamId], references: [id])
+  hint      Hint     @relation(fields: [hintId], references: [id])
+  unlockedAt DateTime @default(now())
+
+  @@unique([teamId, hintId])
+}
+
+model File {
+  id          String    @id @default(cuid())
+  name        String
+  url         String
+  size        Int
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+}
+
+model Submission {
+  id          String    @id @default(cuid())
+  teamId      String
+  challengeId String
+  flag        String
+  correct     Boolean
+  points      Int       @default(0)
+  team        Team      @relation(fields: [teamId], references: [id])
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  submittedAt DateTime  @default(now())
+
+  @@unique([teamId, challengeId, correct])
+}
+
+model EventConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  updatedAt   DateTime @updatedAt
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+  INSANE
+}
