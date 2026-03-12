@@ -105,12 +105,12 @@ async function main() {
     },
     {
       title: 'Memory Dump',
-      description: 'A memory snapshot was captured from the suspect\'s machine. Somewhere inside is a string that looks like a flag — it was briefly stored in memory when they accessed it.\n\n**File**: `dump.raw`\n\n**Tools**: Volatility3, or simply `strings dump.raw | grep GC{`\n\nDead memory still tells stories.',
+      description: 'A memory snapshot was captured from the suspect\'s machine during a live incident response. The attacker had a process running — something that shouldn\'t be there.\n\n**File**: `dump.raw`\n\n**Tools**: `strings`, `grep`, `base64`, Volatility3\n\nDead memory still tells stories. But you have to read between the lines.',
       difficulty: 'HARD',
       points: 500,
       flag: 'GC{v0l4t1l1ty_m3m0ry_4n4lys1s}',
       categoryId: forensics.id,
-      hints: [{ content: 'Start with: strings dump.raw | grep -i "GC{"', cost: 0 }, { content: 'Use Volatility: vol.py -f dump.raw windows.cmdline', cost: 100 }],
+      hints: [{ content: 'Malware hides in plain sight — start by listing all process names in the dump and read them very carefully.', cost: 0 }, { content: 'PowerShell\'s -enc / -EncodedCommand flag accepts a Base64-encoded command. Find a suspicious process\'s command line and decode it.', cost: 100 }],
     },
     {
       title: 'Network Ghost',

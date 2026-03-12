@@ -3,7 +3,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { adminAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import GlitchText from '../components/GlitchText';
-import { Settings, Target, Users, BarChart2, Plus, Trash2, Edit3, RefreshCw, Shield } from 'lucide-react';
+import { Settings, Target, Users, BarChart2, Plus, Trash2, Edit3, RefreshCw, Shield, Upload, Paperclip } from 'lucide-react';
 
 const NAV = [
   { to: '/admin', label: 'Overview', icon: BarChart2, exact: true },
@@ -78,6 +78,8 @@ function ChallengeAdmin() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', difficulty: 'EASY', points: 100, flag: '', categoryId: '', isActive: true, isFeatured: false });
   const [saving, setSaving] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(null);
 
   const load = () => Promise.all([adminAPI.getChallenges(), adminAPI.getCategories()])
     .then(([c, cat]) => { setChallenges(c.data); setCategories(cat.data); });
@@ -90,9 +92,16 @@ function ChallengeAdmin() {
     e.preventDefault();
     setSaving(true);
     try {
-      await adminAPI.createChallenge({ ...form, points: parseInt(form.points) });
+      const res = await adminAPI.createChallenge({ ...form, points: parseInt(form.points) });
+      if (selectedFile) {
+        const fd = new FormData();
+        fd.append('file', selectedFile);
+        fd.append('challengeId', res.data.id);
+        await adminAPI.uploadFile(fd);
+      }
       toast.success('Challenge created!');
       setShowForm(false);
+      setSelectedFile(null);
       setForm({ title: '', description: '', difficulty: 'EASY', points: 100, flag: '', categoryId: '', isActive: true, isFeatured: false });
       load();
     } catch (err) {
@@ -140,6 +149,17 @@ function ChallengeAdmin() {
             </div>
             <div><label style={labelStyle}>Points</label><input type="number" style={inputStyle} value={form.points} onChange={set('points')} min={1} max={10000} required /></div>
             <div style={{ gridColumn: '1/-1' }}><label style={labelStyle}>Flag * (exact match)</label><input style={inputStyle} value={form.flag} onChange={set('flag')} placeholder="GC{...}" required /></div>
+            <div style={{ gridColumn: '1/-1' }}>
+              <label style={labelStyle}>Attachment (optional)</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: 'var(--bg-deep)', border: '1px solid var(--border-bright)', padding: '0.5rem 1rem', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  <Upload size={14} />
+                  Choose File
+                  <input type="file" style={{ display: 'none' }} onChange={(e) => setSelectedFile(e.target.files[0] || null)} />
+                </label>
+                {selectedFile && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--neon-green)' }}>{selectedFile.name}</span>}
+              </div>
+            </div>
             <div style={{ gridColumn: '1/-1', display: 'flex', gap: '2rem', alignItems: 'center' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                 <input type="checkbox" checked={form.isActive} onChange={set('isActive')} />
@@ -173,6 +193,25 @@ function ChallengeAdmin() {
             <span className={`badge badge-${c.difficulty?.toLowerCase()}`}>{c.difficulty}</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--neon-green)' }}>{c.points}pts</span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--text-dim)' }}>{c._count?.submissions || 0} solves</span>
+            {c.files?.length > 0 && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--neon-cyan)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Paperclip size={12} />{c.files.length}</span>}
+            <label style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--neon-orange)', padding: 0, display: 'flex', alignItems: 'center' }} title="Upload file">
+              <Upload size={14} />
+              <input type="file" style={{ display: 'none' }} onChange={async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                setUploading(c.id);
+                try {
+                  const fd = new FormData();
+                  fd.append('file', file);
+                  fd.append('challengeId', c.id);
+                  await adminAPI.uploadFile(fd);
+                  toast.success(`File uploaded to ${c.title}`);
+                  load();
+                } catch { toast.error('Upload failed'); }
+                finally { setUploading(null); e.target.value = ''; }
+              }} />
+            </label>
+            {uploading === c.id && <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', color: 'var(--neon-orange)' }}>...</span>}
             <button onClick={() => handleDelete(c.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--neon-pink)', padding: 0 }}>
               <Trash2 size={14} />
             </button>
