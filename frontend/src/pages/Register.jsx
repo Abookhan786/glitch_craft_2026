@@ -4,13 +4,31 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { Users } from 'lucide-react';
 
+function RegisterField({ label, name, type = 'text', placeholder, required = false, value, onChange }) {
+  return (
+    <div>
+      <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-secondary)', letterSpacing: '0.1em', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+        {label} {required && <span style={{ color: 'var(--neon-pink)' }}>*</span>}
+      </label>
+      <input
+        type={type}
+        required={required}
+        className="input"
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+      />
+    </div>
+  );
+}
+
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '', country: '' });
   const [loading, setLoading] = useState(false);
 
-  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const set = (k) => (e) => setForm((prev) => ({ ...prev, [k]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,21 +47,6 @@ export default function Register() {
       setLoading(false);
     }
   };
-
-  const Field = ({ label, name, type = 'text', placeholder, required = false }) => (
-    <div>
-      <label style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--text-secondary)', letterSpacing: '0.1em', display: 'block', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
-        {label} {required && <span style={{ color: 'var(--neon-pink)' }}>*</span>}
-      </label>
-      <input
-        type={type} required={required}
-        className="input"
-        value={form[name]}
-        onChange={set(name)}
-        placeholder={placeholder}
-      />
-    </div>
-  );
 
   return (
     <div style={{
@@ -74,10 +77,10 @@ export default function Register() {
           }} />
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
-            <Field label="Team Name" name="name" placeholder="CyberSleuth42" required />
-            <Field label="Email" name="email" type="email" placeholder="team@example.com" required />
-            <Field label="Password" name="password" type="password" placeholder="Min. 8 characters" required />
-            <Field label="Country (optional)" name="country" placeholder="India" />
+            <RegisterField label="Team Name" name="name" placeholder="CyberSleuth42" required value={form.name} onChange={set('name')} />
+            <RegisterField label="Email" name="email" type="email" placeholder="team@example.com" required value={form.email} onChange={set('email')} />
+            <RegisterField label="Password" name="password" type="password" placeholder="Min. 8 characters" required value={form.password} onChange={set('password')} />
+            <RegisterField label="Country (optional)" name="country" placeholder="India" value={form.country} onChange={set('country')} />
 
             {/* Password strength */}
             {form.password && (
