@@ -31,8 +31,8 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://glitchcraft:Abookhan@786@postgres:5432/glitchcraft_db
-      JWT_SECRET: ${JWT_SECRET:-glitchcraft-super-secret-jwt-2024-change-me}
+      DATABASE_URL: postgresql://glitchcraft:Abookhan786@postgres:5432/glitchcraft_db
+      JWT_SECRET: ${JWT_SECRET:bxihshd1SXU8eidEC3EOQLoq1TNTowsjua3xq9XoSa0}
       JWT_EXPIRES_IN: 7d
       NODE_ENV: production
       PORT: 5000
