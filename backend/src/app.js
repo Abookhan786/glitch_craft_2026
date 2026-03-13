@@ -1,4 +1,14 @@
 require('dotenv').config();
+const { execSync } = require('child_process');
+
+// Run prisma db push on startup
+try {
+  console.log('Running database migrations...');
+  execSync('./node_modules/.bin/prisma db push --accept-data-loss', { stdio: 'inherit' });
+  console.log('Database ready!');
+} catch (err) {
+  console.error('Migration failed:', err.message);
+}
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
