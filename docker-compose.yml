@@ -51,7 +51,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: http://localhost:5000
+        VITE_API_URL: https://glitch-craft-2026.onrender.com
     container_name: glitchcraft-web
     restart: unless-stopped
     depends_on:

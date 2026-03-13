@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 
 let globalSocket = null;
+const socketUrl = import.meta.env.VITE_SOCKET_URL || 'https://glitch-craft-2026.onrender.com';
 
 export const useSocket = (events = {}) => {
   const handlersRef = useRef(events);
@@ -9,7 +10,7 @@ export const useSocket = (events = {}) => {
 
   useEffect(() => {
     if (!globalSocket) {
-      globalSocket = io(window.location.origin, { transports: ['websocket', 'polling'] });
+      globalSocket = io(socketUrl, { transports: ['websocket', 'polling'] });
     }
 
     const socket = globalSocket;
