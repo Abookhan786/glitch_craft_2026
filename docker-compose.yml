@@ -31,7 +31,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://glitchcraft:Abookhan786@postgres:5432/glitchcraft_db
+      DATABASE_URL: postgresql://neondb_owner:npg_4kxHcbZ9tMEP@ep-delicate-dust-ad2bqk63-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       JWT_SECRET: ${JWT_SECRET:bxihshd1SXU8eidEC3EOQLoq1TNTowsjua3xq9XoSa0}
       JWT_EXPIRES_IN: 7d
       NODE_ENV: production
